@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>824</width>
+    <height>492</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>UAC Control</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QGroupBox" name="g_basicsettings">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>30</y>
+      <width>321</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Basic</string>
+    </property>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>20</y>
+       <width>54</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Theme:</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="combo_theme">
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>20</y>
+       <width>131</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pb_ApplyTheme">
+     <property name="geometry">
+      <rect>
+       <x>220</x>
+       <y>20</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Apply</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pb_ImportTheme">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>80</y>
+       <width>141</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Import theme from file</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pb_DeleteTheme">
+     <property name="geometry">
+      <rect>
+       <x>220</x>
+       <y>50</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Delete</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="g_advancedsettings">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>30</y>
+      <width>181</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Advanced</string>
+    </property>
+    <widget class="QCheckBox" name="cb_network">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>16</y>
+       <width>111</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Allow Network</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="cb_localstorage">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>46</y>
+       <width>141</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Though it's not allowed for themes to access local files (at least I've tried to do this), themes can declare a &amp;quot;local storage&amp;quot; to save data.&lt;/p&gt;&lt;p&gt;Different themes should have seperate local storages, but that's not promised.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>Allow local storage</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pb_ApplyAdvancedSettings">
+     <property name="geometry">
+      <rect>
+       <x>50</x>
+       <y>90</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Apply</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="cb_service">
+     <property name="geometry">
+      <rect>
+       <x>21</x>
+       <y>69</y>
+       <width>141</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This program replaces one of the system files, so &amp;quot;sfc.exe&amp;quot; may try to fix this &amp;quot;corruption&amp;quot; if you run it.&lt;/p&gt;&lt;p&gt;By registering a service, we can lock the replaced file so sfc won't be able to perform the &amp;quot;fix&amp;quot;. What's more, the service will check the file at startup, and try to ensure the replacement if needed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>Register service</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="g_allowlist">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>160</y>
+      <width>761</width>
+      <height>321</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>allowlist</string>
+    </property>
+    <widget class="QListWidget" name="lw_allowlist">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>631</width>
+       <height>291</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pb_removeal">
+     <property name="geometry">
+      <rect>
+       <x>670</x>
+       <y>150</y>
+       <width>75</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string> Remove</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="g_securedesktop">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>30</y>
+      <width>201</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Prompt on Secure Desktop</string>
+    </property>
+    <widget class="QRadioButton" name="rb_sd_y">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>20</y>
+       <width>89</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Yes</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="rb_sd_n">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>40</y>
+       <width>89</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>No</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="rb_sd_undefined">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>59</y>
+       <width>161</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Respect System Settings</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pb_ApplySecureDesktop">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>90</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Apply</string>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

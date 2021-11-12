@@ -1,0 +1,123 @@
+[submodule "boost-array"]
+	path = src/3rdparty/boost/array
+	url = https://github.com/boostorg/array
+[submodule "boost-assert"]
+	path = src/3rdparty/boost/assert
+	url = https://github.com/boostorg/assert
+[submodule "boost-bind"]
+	path = src/3rdparty/boost/bind
+	url = https://github.com/boostorg/bind
+[submodule "boost-config"]
+	path = src/3rdparty/boost/config
+	url = https://github.com/boostorg/config
+[submodule "boost-container_hash"]
+	path = src/3rdparty/boost/container_hash
+	url = https://github.com/boostorg/container_hash
+[submodule "boost-conversion"]
+	path = src/3rdparty/boost/conversion
+	url = https://github.com/boostorg/conversion
+[submodule "boost-core"]
+	path = src/3rdparty/boost/core
+	url = https://github.com/boostorg/core
+[submodule "boost-detail"]
+	path = src/3rdparty/boost/detail
+	url = https://github.com/boostorg/detail
+[submodule "boost-concept_check"]
+	path = src/3rdparty/boost/concept_check
+	url = https://github.com/boostorg/concept_check
+[submodule "boost-format"]
+	path = src/3rdparty/boost/format
+	url = https://github.com/boostorg/format
+[submodule "boost-function"]
+	path = src/3rdparty/boost/function
+	url = https://github.com/boostorg/function
+[submodule "boost-io"]
+	path = src/3rdparty/boost/io
+	url = https://github.com/boostorg/io
+[submodule "boost-function_types"]
+	path = src/3rdparty/boost/function_types
+	url = https://github.com/boostorg/function_types
+[submodule "boost-fusion"]
+	path = src/3rdparty/boost/fusion
+	url = https://github.com/boostorg/fusion
+[submodule "boost-integer"]
+	path = src/3rdparty/boost/integer
+	url = https://github.com/boostorg/integer
+[submodule "boost-iterator"]
+	path = src/3rdparty/boost/iterator
+	url = https://github.com/boostorg/iterator
+[submodule "boost-move"]
+	path = src/3rdparty/boost/move
+	url = https://github.com/boostorg/move
+[submodule "boost-mpl"]
+	path = src/3rdparty/boost/mpl
+	url = https://github.com/boostorg/mpl
+[submodule "boost-optional"]
+	path = src/3rdparty/boost/optional
+	url = https://github.com/boostorg/optional
+[submodule "boost-preprocessor"]
+	path = src/3rdparty/boost/preprocessor
+	url = https://github.com/boostorg/preprocessor
+[submodule "boost-predef"]
+	path = src/3rdparty/boost/predef
+	url = https://github.com/boostorg/predef
+[submodule "boost-range"]
+	path = src/3rdparty/boost/range
+	url = https://github.com/boostorg/range
+[submodule "boost-regex"]
+	path = src/3rdparty/boost/regex
+	url = https://github.com/boostorg/regex
+[submodule "boost-scope_exit"]
+	path = src/3rdparty/boost/scope_exit
+	url = https://github.com/boostorg/scope_exit
+[submodule "boost-smart_ptr"]
+	path = src/3rdparty/boost/smart_ptr
+	url = https://github.com/boostorg/smart_ptr
+[submodule "boost-static_assert"]
+	path = src/3rdparty/boost/static_assert
+	url = https://github.com/boostorg/static_assert
+[submodule "boost-throw_exception"]
+	path = src/3rdparty/boost/throw_exception
+	url = https://github.com/boostorg/throw_exception
+[submodule "boost-tuple"]
+	path = src/3rdparty/boost/tuple
+	url = https://github.com/boostorg/tuple
+[submodule "boost-type_index"]
+	path = src/3rdparty/boost/type_index
+	url = https://github.com/boostorg/type_index
+[submodule "boost-type_traits"]
+	path = src/3rdparty/boost/type_traits
+	url = https://github.com/boostorg/type_traits
+[submodule "boost-filesystem"]
+	path = src/3rdparty/boost/filesystem
+	url = https://github.com/boostorg/filesystem
+[submodule "boost-typeof"]
+	path = src/3rdparty/boost/typeof
+	url = https://github.com/boostorg/typeof
+[submodule "boost-utility"]
+	path = src/3rdparty/boost/utility
+	url = https://github.com/boostorg/utility
+[submodule "boost-align"]
+	path = src/3rdparty/boost/align
+	url = https://github.com/boostorg/align
+[submodule "boost-atomic"]
+	path = src/3rdparty/boost/atomic
+	url = https://github.com/boostorg/atomic
+[submodule "boost-winapi"]
+	path = src/3rdparty/boost/winapi
+	url = https://github.com/boostorg/winapi
+[submodule "boost-system"]
+	path = src/3rdparty/boost/system
+	url = https://github.com/boostorg/system
+[submodule "boost-mp11"]
+	path = src/3rdparty/boost/mp11
+	url = https://github.com/boostorg/mp11
+[submodule "boost-variant2"]
+	path = src/3rdparty/boost/variant2
+	url = https://github.com/boostorg/variant2
+[submodule "winreg"]
+	path = src/3rdparty/WinReg/WinReg
+	url = https://github.com/GiovanniDicanio/WinReg
+[submodule "unqlite"]
+	path = src/3rdparty/unqlite/unqlite
+	url = https://github.com/symisc/unqlite

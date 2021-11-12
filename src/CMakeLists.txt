@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.20)
+project(CustomUAC VERSION 0.1 LANGUAGES CXX)
+add_subdirectory(3rdparty/unqlite)
+add_subdirectory(3rdparty/boost)
+add_subdirectory(3rdparty/WinReg)
+add_subdirectory(UACmain)
+add_subdirectory(Service)
+add_subdirectory(Control)

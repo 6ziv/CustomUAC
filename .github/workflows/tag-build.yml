@@ -1,0 +1,179 @@
+name: build-and-release
+on: 
+  push: 
+    tags: 
+      - '*'
+jobs: 
+  build-zlib: 
+    runs-on: windows-2022
+    steps: 
+      - uses: jwlawson/actions-setup-cmake@v1.9
+        with: 
+          cmake-version: '3.22.x'
+      - run: aria2c -j8 -o "zlib-v1.2.11.tar.gz" "https://github.com/madler/zlib/archive/refs/tags/v1.2.11.tar.gz"
+      - run: cmake -E tar xvf zlib-v1.2.11.tar.gz
+      - uses: ilammy/msvc-dev-cmd@v1
+        with: 
+          arch: x64
+          spectre: true
+      - run: nmake -f win32/Makefile.msc CFLAGS="/MT /W3 /O2" LDFLAGS="/NOLOGO" ARFLAGS="/NOLOGO"
+        working-directory: .\zlib-1.2.11
+      - run: New-Item ${{ runner.temp }}\zlib\include -ItemType Directory
+      - run: New-Item ${{ runner.temp }}\zlib\lib -ItemType Directory
+      - run: Copy-Item .\zlib.lib -Destination "${{ runner.temp }}\zlib\lib"
+        working-directory: .\zlib-1.2.11
+      - run: Copy-Item .\zlib.h,.\zconf.h -Destination "${{ runner.temp }}\zlib\include"
+        working-directory: .\zlib-1.2.11
+      - uses: DamianReeves/write-file-action@v1.0
+        with: 
+          path: ${{ runner.temp }}\zlib\zlib.pc
+          contents: |
+            prefix=${pcfiledir}
+            exec_prefix=${prefix}
+            libdir=${prefix}/lib
+            sharedlibdir=${prefix}/lib
+            includedir=${prefix}/include
+            
+            Name: zlib
+            Description: zlib compression library
+            Version: 1.2.11
+            
+            Requires:
+            Libs: -L"${libdir}" -L"${sharedlibdir}" -lzlib
+            Cflags: -I"${includedir}"
+            
+          write-mode: overwrite
+      - uses: actions/upload-artifact@v2
+        with: 
+          name: zlib
+          path: ${{ runner.temp }}\zlib
+          retention-days: 1
+  build-openssl:
+    needs: build-zlib
+    runs-on: windows-2022
+    steps: 
+      - uses: actions/download-artifact@v2
+        with: 
+          name: zlib
+          path: ${{ runner.temp }}\zlib
+      - uses: jwlawson/actions-setup-cmake@v1.9
+        with: 
+          cmake-version: '3.22.x'
+      - run: aria2c -j8 -o "strawberry-perl-5.32.1.1-64bit-portable.zip" "https://strawberryperl.com/download/5.32.1.1/strawberry-perl-5.32.1.1-64bit-portable.zip"
+      - run: 7z x "strawberry-perl-5.32.1.1-64bit-portable.zip" perl -r
+      - run: echo "$env:GITHUB_WORKSPACE\perl\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - uses: ilammy/setup-nasm@v1
+      - run: aria2c -j8 -o "OpenSSL_1_1_1l.tar.gz" "https://github.com/openssl/openssl/archive/refs/tags/OpenSSL_1_1_1l.tar.gz"
+      - run: cmake -E tar xvf OpenSSL_1_1_1l.tar.gz
+      - run: New-Item .\openssl-OpenSSL_1_1_1l\build -ItemType Directory
+      - uses: ilammy/msvc-dev-cmd@v1
+        with: 
+          arch: x64
+          spectre: true
+      - run: perl ../Configure --prefix=${{ runner.temp }}/openssl --openssldir=${{ runner.temp }}/openssl --release --with-zlib-include="${{ runner.temp }}/zlib/include" --with-zlib-lib="${{ runner.temp }}/zlib/lib/zlib.lib" no-shared zlib "ARFLAGS=/NOLOGO" "CFLAGS=/MT /W3 /O2" "CXXFLAGS=/MT /W3 /O2" VC-WIN64A
+        working-directory: .\openssl-OpenSSL_1_1_1l\build
+      - run: nmake
+        working-directory: .\openssl-OpenSSL_1_1_1l\build
+      - run: nmake install
+        working-directory: .\openssl-OpenSSL_1_1_1l\build
+      - run: lib /OUT:${{ runner.temp }}\openssl\lib\libssl.lib ${{ runner.temp }}\openssl\lib\libssl.lib ${{ runner.temp }}\zlib\lib\zlib.lib
+      - uses: actions/upload-artifact@v2
+        with: 
+          name: openssl
+          path: ${{ runner.temp }}\openssl
+          retention-days: 1
+  build-qt: 
+    needs: build-openssl
+    runs-on: windows-2022
+    steps: 
+      - uses: jwlawson/actions-setup-cmake@v1.9
+        with: 
+          cmake-version: '3.22.x'
+      - run: aria2c -j8 -o "strawberry-perl-5.32.1.1-64bit-portable.zip" "https://strawberryperl.com/download/5.32.1.1/strawberry-perl-5.32.1.1-64bit-portable.zip"
+      - run: 7z x "strawberry-perl-5.32.1.1-64bit-portable.zip" perl -r
+      - run: echo "$env:GITHUB_WORKSPACE\perl\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - uses: ilammy/msvc-dev-cmd@v1
+        with: 
+          arch: x64
+          spectre: true
+      - uses: actions/download-artifact@v2
+        with: 
+          name: zlib
+          path: ${{ runner.temp }}\zlib
+      - uses: actions/download-artifact@v2
+        with: 
+          name: openssl
+          path: ${{ runner.temp }}\openssl
+      - run: aria2c -j8 -o "qt-everywhere-src-6.2.1.tar.xz.meta" "https://download.qt.io/official_releases/qt/6.2/6.2.1/single/qt-everywhere-src-6.2.1.tar.xz"
+        working-directory: C:\
+      - run: cmake -E tar xvf qt-everywhere-src-6.2.1.tar.xz
+        working-directory: C:\
+      - run: New-Item C:\qt-everywhere-src-6.2.1\build -ItemType Directory
+      - run: ..\configure --prefix=C:/Qt -static -static-runtime -release -qt-doubleconversion -DQT_FEATURE_qt3d_qt_assimp=ON -DQT_FEATURE_qtquick3d_qt_assimp=ON -no-direct2d -no-directwrite -no-xcb-xlib -no-sql-sqlite -no-sql-psql -no-sql-odbc -no-sql-oci -no-sql-mysql -no-sql-ibase -no-sql-db2 -qt-libpng -qt-libjpeg -ico -gif -qt-tiff -qt-webp -qt-sqlite -qt-libpng -qt-libjpeg -qt-freetype -qt-harfbuzz -qt-pcre -qt-zlib -openssl -openssl-linked -no-pch -no-dbus -I${{ runner.temp }}/openssl/include -L${{ runner.temp }}/openssl/lib -I${{ runner.temp }}/zlib/include -L${{ runner.temp }}/zlib/lib -- -DOPENSSL_USE_STATIC_LIBS=ON -DCMAKE_PREFIX_PATH="${{ runner.temp }}/zlib;${{ runner.temp }}/OpenSSL"
+        working-directory: C:\qt-everywhere-src-6.2.1\build
+      - run: ninja qtbase\all qtimageformats\all qtshadertools\all qtsvg\all qtdeclarative\all qtactiveqt\all qttools\all -j8
+        working-directory: C:\qt-everywhere-src-6.2.1\build
+      - run: ninja qtbase\install qtimageformats\install qtshadertools\install qtsvg\install qtdeclarative\install qtactiveqt\install qttools\install
+        working-directory: C:\qt-everywhere-src-6.2.1\build
+      - uses: actions/upload-artifact@v2
+        with: 
+          name: qt
+          path: C:\qt
+          retention-days: 1
+  build-app: 
+    needs: build-qt
+    runs-on: windows-2022
+    defaults: 
+      run: 
+        shell: pwsh
+        working-directory: C:\build
+    steps: 
+      - uses: actions/checkout@v2
+        with: 
+          path: project
+          submodules: 'recursive'
+      - uses: actions/download-artifact@v2
+        with: 
+          name: zlib
+          path: C:\zlib
+      - uses: actions/download-artifact@v2
+        with: 
+          name: openssl
+          path: C:\openssl
+      - uses: actions/download-artifact@v2
+        with: 
+          name: qt
+          path: C:\qt
+      - uses: jwlawson/actions-setup-cmake@v1.9
+        with: 
+          cmake-version: '3.22.x'
+      - uses: ilammy/msvc-dev-cmd@v1
+        with: 
+          arch: x64
+          spectre: true
+      - run: New-Item C:\build -ItemType Directory
+        working-directory: C:\
+      - run: New-Item C:\build-installer -ItemType Directory
+        working-directory: C:\
+      - run: cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=C:\build-installer\CustomUAC -DCMAKE_PREFIX_PATH=C:\Qt $env:GITHUB_WORKSPACE\project\src
+      - run: cmake --build . --parallel
+      - run: cmake --install .
+      - run: openssl req -x509 -days 1 -passout pass:123456 -newkey rsa:4096 -keyout signing.pem -out signing.pem -subj "/CN=6ziv/C=CN/O=Opensource Developer"
+      - run: openssl pkcs12 -export -passin pass:123456 -passout pass:123456 -in signing.pem -out signing.pfx
+      - run: signtool sign /f C:\build\signing.pfx /p 123456 /fd SHA256 /t http://timestamp.digicert.com C:\build-installer\CustomUAC\bin\UACmain.exe
+      - run: aria2c -j8 -o opengl32sw.meta https://download.qt.io/development_releases/prebuilt/llvmpipe/windows/opengl32sw-64-mesa_11_2_2-signed.7z
+      - run: 7z x opengl32sw-64-mesa_11_2_2-signed.7z
+      - run: Copy-Item ".\opengl32sw.dll" -Destination "C:\build-installer\CustomUAC\bin"
+      - run: aria2c -j1 -o "innosetup-6.2.0.exe" "https://files.jrsoftware.org/is/6/innosetup-6.2.0.exe"
+      - run: Copy-Item $env:GITHUB_WORKSPACE\project\installer_script\uac_setup.iss -Destination C:\build-installer
+      - run: .\innosetup-6.2.0.exe /VERYSILENT /SUPPRESSMSGBOXES /DIR="C:\innosetup" C:\build-installer\uac_setup.iss
+      - run: C:\innosetup\ISCC.exe /O"C:\" /F"CustomUAC-installer" C:\build-installer\uac_setup.iss
+      - uses: actions/upload-artifact@v2
+        with: 
+          name: installer
+          path: C:\CustomUAC-installer.exe
+          retention-days: 1
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: C:\CustomUAC-installer.exe

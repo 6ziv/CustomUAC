@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.14)
+cmake_policy(SET CMP0091 NEW)
+add_subdirectory(unqlite EXCLUDE_FROM_ALL)
+target_include_directories(unqlite INTERFACE unqlite)
+if(NOT DEFINED TESTLINKSHARED)
+	set_property(TARGET unqlite PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()

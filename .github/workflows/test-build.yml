@@ -1,0 +1,33 @@
+name: test-build
+on: [push]
+jobs: 
+  build-test-app: 
+    runs-on: windows-2022
+    steps: 
+      - uses: actions/checkout@v2
+        with: 
+          path: project
+          submodules: 'recursive'
+      - uses: jurplel/install-qt-action@v2
+        with: 
+          version: '6.2.1'
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win64_msvc2019_64'
+          dir: 'C:\'
+          tools: 'tools_openssl_x64,1.1.1-10,qt.tools.openssl.win_x64'
+          modules: 'qtbase qtimageformats qtshadertools qtsvg qtdeclarative qtactiveqt qttools'
+      - uses: jwlawson/actions-setup-cmake@v1.9
+        with: 
+          cmake-version: '3.22.x'
+      - uses: ilammy/msvc-dev-cmd@v1
+        with: 
+          arch: x64
+          spectre: true
+      - run: New-Item C:\build -ItemType Directory
+      - run: cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DTESTLINKSHARED=1 -DCMAKE_INSTALL_PREFIX=C:\install -DCMAKE_PREFIX_PATH="C:\Qt\6.2.1\msvc2019_64;C:\Qt\Tools\OpenSSL\Win_x64" $env:GITHUB_WORKSPACE\project\src
+        working-directory: C:\build
+      - run: cmake --build . --parallel
+        working-directory: C:\build
+      - run: cmake --install .
+        working-directory: C:\build
