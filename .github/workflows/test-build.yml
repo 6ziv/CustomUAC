@@ -4,28 +4,33 @@ jobs:
   build-test-app: 
     runs-on: windows-2022
     steps: 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with: 
           path: project
           submodules: 'recursive'
-      - uses: jurplel/install-qt-action@v2
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --upgrade pip
+      - uses: jurplel/install-qt-action@v3
         with: 
-          version: '6.2.1'
+          version: '6.6.0'
+          aqtversion: '==3.1.7'
           host: 'windows'
           target: 'desktop'
           arch: 'win64_msvc2019_64'
           dir: 'C:\'
-          tools: 'tools_openssl_x64,1.1.1-10,qt.tools.openssl.win_x64'
-          modules: 'qtbase qtimageformats qtshadertools qtsvg qtdeclarative qtactiveqt qttools'
-      - uses: jwlawson/actions-setup-cmake@v1.9
+          tools: 'tools_opensslv3_x64'
+          modules: 'qtimageformats qtshadertools qtactiveqt qtmultimedia qtquick3d qtquick3dphysics qtquickeffectmaker qtquicktimeline'
+      - uses: jwlawson/actions-setup-cmake@v1.14.1
         with: 
-          cmake-version: '3.22.x'
+          cmake-version: '3.27.7'
       - uses: ilammy/msvc-dev-cmd@v1
         with: 
           arch: x64
           spectre: true
       - run: New-Item C:\build -ItemType Directory
-      - run: cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DTESTLINKSHARED=1 -DCMAKE_INSTALL_PREFIX=C:\install -DCMAKE_PREFIX_PATH="C:\Qt\6.2.1\msvc2019_64;C:\Qt\Tools\OpenSSL\Win_x64" $env:GITHUB_WORKSPACE\project\src
+      - run: cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DTESTLINKSHARED=1 -DCMAKE_INSTALL_PREFIX=C:\install -DCMAKE_PREFIX_PATH="C:\Qt\6.6.0\msvc2019_64;C:\Qt\Tools\OpenSSL\Win_x64" $env:GITHUB_WORKSPACE\project\src
         working-directory: C:\build
       - run: cmake --build . --parallel
         working-directory: C:\build

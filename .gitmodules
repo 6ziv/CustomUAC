@@ -121,3 +121,9 @@
 [submodule "unqlite"]
 	path = src/3rdparty/unqlite/unqlite
 	url = https://github.com/symisc/unqlite
+[submodule "src/3rdparty/boost/functional"]
+	path = src/3rdparty/boost/functional
+	url = https://github.com/boostorg/functional.git
+[submodule "src/3rdparty/boost/describe"]
+	path = src/3rdparty/boost/describe
+	url = https://github.com/boostorg/describe.git

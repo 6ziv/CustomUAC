@@ -7,23 +7,23 @@ jobs:
   build-zlib: 
     runs-on: windows-2022
     steps: 
-      - uses: jwlawson/actions-setup-cmake@v1.9
+      - uses: jwlawson/actions-setup-cmake@v1.14.1
         with: 
-          cmake-version: '3.22.x'
-      - run: aria2c -j8 -o "zlib-v1.2.11.tar.gz" "https://github.com/madler/zlib/archive/refs/tags/v1.2.11.tar.gz"
-      - run: cmake -E tar xvf zlib-v1.2.11.tar.gz
+          cmake-version: '3.27.7'
+      - run: aria2c -j8 -o "zlib-v1.3.tar.gz" "https://github.com/madler/zlib/archive/refs/tags/v1.3.tar.gz"
+      - run: cmake -E tar xf zlib-v1.3.tar.gz
       - uses: ilammy/msvc-dev-cmd@v1
         with: 
           arch: x64
           spectre: true
       - run: nmake -f win32/Makefile.msc CFLAGS="/MT /W3 /O2" LDFLAGS="/NOLOGO" ARFLAGS="/NOLOGO"
-        working-directory: .\zlib-1.2.11
+        working-directory: .\zlib-1.3
       - run: New-Item ${{ runner.temp }}\zlib\include -ItemType Directory
       - run: New-Item ${{ runner.temp }}\zlib\lib -ItemType Directory
       - run: Copy-Item .\zlib.lib -Destination "${{ runner.temp }}\zlib\lib"
-        working-directory: .\zlib-1.2.11
+        working-directory: .\zlib-1.3
       - run: Copy-Item .\zlib.h,.\zconf.h -Destination "${{ runner.temp }}\zlib\include"
-        working-directory: .\zlib-1.2.11
+        working-directory: .\zlib-1.3
       - uses: DamianReeves/write-file-action@v1.0
         with: 
           path: ${{ runner.temp }}\zlib\zlib.pc
@@ -36,14 +36,14 @@ jobs:
             
             Name: zlib
             Description: zlib compression library
-            Version: 1.2.11
+            Version: 1.3
             
             Requires:
             Libs: -L"${libdir}" -L"${sharedlibdir}" -lzlib
             Cflags: -I"${includedir}"
             
           write-mode: overwrite
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with: 
           name: zlib
           path: ${{ runner.temp }}\zlib
@@ -52,32 +52,31 @@ jobs:
     needs: build-zlib
     runs-on: windows-2022
     steps: 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with: 
           name: zlib
           path: ${{ runner.temp }}\zlib
-      - uses: jwlawson/actions-setup-cmake@v1.9
+      - uses: jwlawson/actions-setup-cmake@v1.14.1
         with: 
-          cmake-version: '3.22.x'
-      - run: aria2c -j8 -o "strawberry-perl-5.32.1.1-64bit-portable.zip" "https://strawberryperl.com/download/5.32.1.1/strawberry-perl-5.32.1.1-64bit-portable.zip"
-      - run: 7z x "strawberry-perl-5.32.1.1-64bit-portable.zip" perl -r
+          cmake-version: '3.27.7'
+      - run: aria2c -j8 -o "strawberry-perl-5.38.0.1-64bit-portable.zip" "https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_5380_5361/strawberry-perl-5.38.0.1-64bit-portable.zip"
+      - run: 7z x "strawberry-perl-5.38.0.1-64bit-portable.zip" perl -r
       - run: echo "$env:GITHUB_WORKSPACE\perl\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - uses: ilammy/setup-nasm@v1
-      - run: aria2c -j8 -o "OpenSSL_1_1_1l.tar.gz" "https://github.com/openssl/openssl/archive/refs/tags/OpenSSL_1_1_1l.tar.gz"
-      - run: cmake -E tar xvf OpenSSL_1_1_1l.tar.gz
-      - run: New-Item .\openssl-OpenSSL_1_1_1l\build -ItemType Directory
+      - run: aria2c -j8 -o "OpenSSL_1_1_1w.tar.gz" "https://github.com/openssl/openssl/archive/refs/tags/OpenSSL_1_1_1w.tar.gz"
+      - run: cmake -E tar xf OpenSSL_1_1_1w.tar.gz
+      - run: New-Item .\openssl-OpenSSL_1_1_1w\build -ItemType Directory
       - uses: ilammy/msvc-dev-cmd@v1
         with: 
           arch: x64
           spectre: true
-      - run: perl ../Configure --prefix=${{ runner.temp }}/openssl --openssldir=${{ runner.temp }}/openssl --release --with-zlib-include="${{ runner.temp }}/zlib/include" --with-zlib-lib="${{ runner.temp }}/zlib/lib/zlib.lib" no-shared zlib "ARFLAGS=/NOLOGO" "CFLAGS=/MT /W3 /O2" "CXXFLAGS=/MT /W3 /O2" VC-WIN64A
-        working-directory: .\openssl-OpenSSL_1_1_1l\build
+      - run: perl ../Configure --prefix=${{ runner.temp }}/openssl --openssldir=${{ runner.temp }}/openssl --release --with-zlib-include="${{ runner.temp }}/zlib/include" --with-zlib-lib="${{ runner.temp }}/zlib/lib/zlib.lib" no-shared no-tests zlib "ARFLAGS=/NOLOGO" "CFLAGS=/MT /W3 /O2" "CXXFLAGS=/MT /W3 /O2" VC-WIN64A
+        working-directory: .\openssl-OpenSSL_1_1_1w\build
       - run: nmake
-        working-directory: .\openssl-OpenSSL_1_1_1l\build
-      - run: nmake install
-        working-directory: .\openssl-OpenSSL_1_1_1l\build
-      - run: lib /OUT:${{ runner.temp }}\openssl\lib\libssl.lib ${{ runner.temp }}\openssl\lib\libssl.lib ${{ runner.temp }}\zlib\lib\zlib.lib
-      - uses: actions/upload-artifact@v2
+        working-directory: .\openssl-OpenSSL_1_1_1w\build
+      - run: nmake install_sw 
+        working-directory: .\openssl-OpenSSL_1_1_1w\build
+      - uses: actions/upload-artifact@v3
         with: 
           name: openssl
           path: ${{ runner.temp }}\openssl
@@ -86,36 +85,36 @@ jobs:
     needs: build-openssl
     runs-on: windows-2022
     steps: 
-      - uses: jwlawson/actions-setup-cmake@v1.9
+      - uses: jwlawson/actions-setup-cmake@v1.14.1
         with: 
-          cmake-version: '3.22.x'
-      - run: aria2c -j8 -o "strawberry-perl-5.32.1.1-64bit-portable.zip" "https://strawberryperl.com/download/5.32.1.1/strawberry-perl-5.32.1.1-64bit-portable.zip"
-      - run: 7z x "strawberry-perl-5.32.1.1-64bit-portable.zip" perl -r
+          cmake-version: '3.27.7'
+      - run: aria2c -j8 -o "strawberry-perl-5.38.0.1-64bit-portable.zip" "https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_5380_5361/strawberry-perl-5.38.0.1-64bit-portable.zip"
+      - run: 7z x "strawberry-perl-5.38.0.1-64bit-portable.zip" perl -r
       - run: echo "$env:GITHUB_WORKSPACE\perl\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - uses: ilammy/msvc-dev-cmd@v1
         with: 
           arch: x64
           spectre: true
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with: 
           name: zlib
-          path: ${{ runner.temp }}\zlib
-      - uses: actions/download-artifact@v2
+          path: C:\zlib
+      - uses: actions/download-artifact@v3
         with: 
           name: openssl
-          path: ${{ runner.temp }}\openssl
-      - run: aria2c -j8 -o "qt-everywhere-src-6.2.1.tar.xz.meta" "https://download.qt.io/official_releases/qt/6.2/6.2.1/single/qt-everywhere-src-6.2.1.tar.xz"
+          path: C:\openssl
+      - run: aria2c -j8 -o "qt-everywhere-src-6.6.0.tar.xz.meta" "https://download.qt.io/official_releases/qt/6.6/6.6.0/single/qt-everywhere-src-6.6.0.tar.xz"
         working-directory: C:\
-      - run: cmake -E tar xvf qt-everywhere-src-6.2.1.tar.xz
+      - run: cmake -E tar xf qt-everywhere-src-6.6.0.tar.xz
         working-directory: C:\
-      - run: New-Item C:\qt-everywhere-src-6.2.1\build -ItemType Directory
-      - run: ..\configure --prefix=C:/Qt -static -static-runtime -release -qt-doubleconversion -DQT_FEATURE_qt3d_qt_assimp=ON -DQT_FEATURE_qtquick3d_qt_assimp=ON -no-direct2d -no-directwrite -no-xcb-xlib -no-sql-sqlite -no-sql-psql -no-sql-odbc -no-sql-oci -no-sql-mysql -no-sql-ibase -no-sql-db2 -qt-libpng -qt-libjpeg -ico -gif -qt-tiff -qt-webp -qt-sqlite -qt-libpng -qt-libjpeg -qt-freetype -qt-harfbuzz -qt-pcre -qt-zlib -openssl -openssl-linked -no-pch -no-dbus -I${{ runner.temp }}/openssl/include -L${{ runner.temp }}/openssl/lib -I${{ runner.temp }}/zlib/include -L${{ runner.temp }}/zlib/lib -- -DOPENSSL_USE_STATIC_LIBS=ON -DCMAKE_PREFIX_PATH="${{ runner.temp }}/zlib;${{ runner.temp }}/OpenSSL"
-        working-directory: C:\qt-everywhere-src-6.2.1\build
-      - run: ninja qtbase\all qtimageformats\all qtshadertools\all qtsvg\all qtdeclarative\all qtactiveqt\all qttools\all -j8
-        working-directory: C:\qt-everywhere-src-6.2.1\build
-      - run: ninja qtbase\install qtimageformats\install qtshadertools\install qtsvg\install qtdeclarative\install qtactiveqt\install qttools\install
-        working-directory: C:\qt-everywhere-src-6.2.1\build
-      - uses: actions/upload-artifact@v2
+      - run: New-Item C:\qt-everywhere-src-6.6.0\build -ItemType Directory
+      - run: ..\configure --prefix=C:/Qt -static -static-runtime -release -qt-doubleconversion -no-direct2d -no-directwrite -no-xcb-xlib -no-sql-sqlite -no-sql-psql -no-sql-odbc -no-sql-oci -no-sql-mysql -no-sql-ibase -no-sql-db2 -qt-libpng -qt-libjpeg -ico -gif -qt-tiff -qt-webp -qt-sqlite -qt-libpng -qt-libjpeg -qt-freetype -qt-harfbuzz -qt-pcre -system-zlib -openssl-linked -openssl -no-pch -no-dbus -skip qtsensors -skip qtwebview -skip qtwayland -skip qtpdf -skip qtwebengine -skip qtconnectivity -nomake examples -nomake tests -no-feature-qdoc -IC:/openssl/include -LC:/openssl/lib -IC:/zlib/include -LC:/zlib/lib -- -DOPENSSL_USE_STATIC_LIBS=ON -DCMAKE_PREFIX_PATH="C:/zlib;C:/OpenSSL"
+        working-directory: C:\qt-everywhere-src-6.6.0\build
+      - run: cmake --build . --parallel
+        working-directory: C:\qt-everywhere-src-6.6.0\build
+      - run: cmake --install .
+        working-directory: C:\qt-everywhere-src-6.6.0\build
+      - uses: actions/upload-artifact@v3
         with: 
           name: qt
           path: C:\qt
@@ -128,25 +127,25 @@ jobs:
         shell: pwsh
         working-directory: C:\build
     steps: 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with: 
           path: project
           submodules: 'recursive'
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with: 
           name: zlib
           path: C:\zlib
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with: 
           name: openssl
           path: C:\openssl
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with: 
           name: qt
           path: C:\qt
-      - uses: jwlawson/actions-setup-cmake@v1.9
+      - uses: jwlawson/actions-setup-cmake@v1.14.1
         with: 
-          cmake-version: '3.22.x'
+          cmake-version: '3.27.7'
       - uses: ilammy/msvc-dev-cmd@v1
         with: 
           arch: x64
@@ -155,7 +154,7 @@ jobs:
         working-directory: C:\
       - run: New-Item C:\build-installer -ItemType Directory
         working-directory: C:\
-      - run: cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=C:\build-installer\CustomUAC -DCMAKE_PREFIX_PATH=C:\Qt $env:GITHUB_WORKSPACE\project\src
+      - run: cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=C:\build-installer\CustomUAC -DCMAKE_PREFIX_PATH="C:/Qt;C:/zlib;C:/OpenSSL" $env:GITHUB_WORKSPACE\project\src
       - run: cmake --build . --parallel
       - run: cmake --install .
       - run: openssl req -x509 -days 1 -passout pass:123456 -newkey rsa:4096 -keyout signing.pem -out signing.pem -subj "/CN=6ziv/C=CN/O=Opensource Developer"
@@ -164,11 +163,11 @@ jobs:
       - run: aria2c -j8 -o opengl32sw.meta https://download.qt.io/development_releases/prebuilt/llvmpipe/windows/opengl32sw-64-mesa_11_2_2-signed.7z
       - run: 7z x opengl32sw-64-mesa_11_2_2-signed.7z
       - run: Copy-Item ".\opengl32sw.dll" -Destination "C:\build-installer\CustomUAC\bin"
-      - run: aria2c -j1 -o "innosetup-6.2.0.exe" "https://files.jrsoftware.org/is/6/innosetup-6.2.0.exe"
+      - run: aria2c -j1 -o "innosetup-6.2.2.exe" "https://files.jrsoftware.org/is/6/innosetup-6.2.2.exe"
       - run: Copy-Item $env:GITHUB_WORKSPACE\project\installer_script\uac_setup.iss -Destination C:\build-installer
-      - run: .\innosetup-6.2.0.exe /VERYSILENT /SUPPRESSMSGBOXES /DIR="C:\innosetup" C:\build-installer\uac_setup.iss
+      - run: Start-Process .\innosetup-6.2.2.exe -PassThru -NoNewWindow -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /DIR=`"C:\innosetup`" /LOG=`"C:\innosetup.log`""|Wait-Process
       - run: C:\innosetup\ISCC.exe /O"C:\" /F"CustomUAC-installer" C:\build-installer\uac_setup.iss
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with: 
           name: installer
           path: C:\CustomUAC-installer.exe

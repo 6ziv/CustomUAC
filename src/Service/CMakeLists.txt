@@ -18,8 +18,7 @@ add_executable(UACService ${PROJECT_SOURCES})
 if(NOT DEFINED TESTLINKSHARED)
 	set_property(TARGET UACService PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
-
-target_link_options(UACService PRIVATE /MANIFEST:NO)
+SET_TARGET_PROPERTIES(UACService PROPERTIES LINK_FLAGS "/MANIFESTUAC:\"level='requireAdministrator' uiAccess='false'\"")
 target_compile_definitions(UACService
   PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 

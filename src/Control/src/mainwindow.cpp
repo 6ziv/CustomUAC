@@ -29,7 +29,8 @@ MainWindow::MainWindow(QWidget *parent)
         winreg::RegKey key;
         auto reg_result = key.TryOpen(HKEY_LOCAL_MACHINE, L"Software\\CustomUAC", KEY_READ);
         if (reg_result) {
-            strInstallation = key.TryGetStringValue(L"installation").value_or(std::wstring());
+			auto get_installation_result = key.TryGetStringValue(L"installation");
+            strInstallation = get_installation_result.IsValid()?get_installation_result.GetValue():std::wstring();
             key.Close();
         }
     }
@@ -68,7 +69,8 @@ void MainWindow::reloadBasicSettings(){
     auto reg_result = key.TryOpen(HKEY_LOCAL_MACHINE, L"Software\\CustomUAC", KEY_READ);
     std::wstring theme;
     if (reg_result) {
-        theme = key.TryGetStringValue(L"Theme").value_or(std::wstring());
+		auto get_theme_result = key.TryGetStringValue(L"Theme");
+        theme = get_theme_result.IsValid()?get_theme_result.GetValue():std::wstring();
         key.Close();
     }
     QFile themelist(QString::fromStdWString((installation/"themes/themes.list").wstring()));
@@ -116,8 +118,10 @@ void MainWindow::reloadAdvancedSettings(){
     auto reg_result = key.TryOpen(HKEY_LOCAL_MACHINE, L"Software\\CustomUAC", KEY_READ);
     bool network,local_storage;
     if (reg_result) {
-        network = key.TryGetDwordValue(L"AllowNetwork").value_or(0) != 0;
-        local_storage = key.TryGetDwordValue(L"AllowLocalStorage").value_or(0) != 0;
+		auto get_network_result = key.TryGetDwordValue(L"AllowNetwork");
+        network = get_network_result.IsValid()?(get_network_result.GetValue()!=0):false;
+		auto get_local_storage_result = key.TryGetDwordValue(L"AllowLocalStorage");
+        local_storage = get_local_storage_result.IsValid()?(get_local_storage_result.GetValue()!=0):false;;
         key.Close();
     }
     ui->cb_service->setEnabled(false);
@@ -148,7 +152,8 @@ void MainWindow::reloadSecureDesktopSetting(){
     auto reg_result = key.TryOpen(HKEY_LOCAL_MACHINE, L"Software\\CustomUAC", KEY_READ);
     DWORD securedesktop;
     if (reg_result) {
-        securedesktop = key.TryGetDwordValue(L"PromptOnSecureDesktop").value_or(-1);
+		auto get_secure_desktop_result = key.TryGetDwordValue(L"PromptOnSecureDesktop");
+        securedesktop = get_secure_desktop_result.IsValid()?get_secure_desktop_result.GetValue():-1;
         key.Close();
     }
     switch (securedesktop) {
@@ -257,7 +262,9 @@ void MainWindow::on_pb_DeleteTheme_clicked()
         winreg::RegKey key;
         auto reg_result = key.TryOpen(HKEY_LOCAL_MACHINE, L"Software\\CustomUAC",KEY_READ|KEY_SET_VALUE);
         if (reg_result) {
-            if(current_string.toStdWString()==key.TryGetStringValue(L"theme").value_or(std::wstring()))
+			auto get_theme_result = key.TryGetStringValue(L"theme");
+			auto theme_str = get_theme_result.IsValid()?get_theme_result.GetValue():std::wstring();
+            if(current_string.toStdWString()==theme_str)
                 key.SetStringValue(L"theme",L"");
             key.Close();
         }

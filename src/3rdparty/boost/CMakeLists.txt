@@ -10,8 +10,10 @@ set(BOOST_SUBDIRS
 	conversion
 	core
 	detail
+	describe
 	format
 	function
+	functional
 	function_types
 	fusion
 	integer

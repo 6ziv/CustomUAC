@@ -34,7 +34,8 @@ endif()
 if(NOT DEFINED TESTLINKSHARED)
 	set_property(TARGET Control PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
-target_link_options(Control PRIVATE /SUBSYSTEM:WINDOWS /MANIFEST:NO)
+SET_TARGET_PROPERTIES(Control PROPERTIES LINK_FLAGS "/MANIFESTUAC:\"level='requireAdministrator' uiAccess='false'\"")
+target_link_options(Control PRIVATE /SUBSYSTEM:WINDOWS)
 target_compile_definitions(Control
   PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 

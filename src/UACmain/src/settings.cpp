@@ -10,9 +10,9 @@ void Settings::load() {
     auto reg_result = key.TryOpen(HKEY_LOCAL_MACHINE, L"Software\\CustomUAC", KEY_READ);
     if (reg_result) {
         auto val = key.TryGetDwordValue(L"PromptOnSecureDesktop");
-        if (val.has_value()) {
-            if (val.value() == 0 || val.value() == 1) {
-                prompt_on_secure_desktop = val.value();
+        if (val.IsValid()) {
+            if (val.GetValue() == 0 || val.GetValue() == 1) {
+                prompt_on_secure_desktop = val.GetValue();
                 prompt_set = true;
             }
         }
@@ -23,17 +23,27 @@ void Settings::load() {
         reg_result = key.TryOpen(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System", KEY_READ);
         if (reg_result) {
             auto val = key.TryGetDwordValue(L"PromptOnSecureDesktop");
-            prompt_on_secure_desktop = val.value_or(1) != 0;
+			if(val.IsValid()){
+				prompt_on_secure_desktop = val.GetValue()!=0;
+			}else{
+				prompt_on_secure_desktop = true;
+			}
             key.Close();
         }
     }
 	
     reg_result = key.TryOpen(HKEY_LOCAL_MACHINE, L"Software\\CustomUAC", KEY_READ);
     if (reg_result) {
-        installation = key.TryGetStringValue(L"installation").value_or(std::wstring());
-        theme = key.TryGetStringValue(L"Theme").value_or(std::wstring());
-        network = key.TryGetDwordValue(L"AllowNetwork").value_or(0) != 0;
-		allow_local_storage = key.TryGetDwordValue(L"AllowLocalStorage").value_or(0) != 0;
+		auto installation_reg = key.TryGetStringValue(L"installation");
+		auto theme_reg = key.TryGetStringValue(L"Theme");
+        auto network_reg = key.TryGetDwordValue(L"AllowNetwork");
+		auto allow_local_storage_reg = key.TryGetDwordValue(L"AllowLocalStorage");
+		
+        installation = installation_reg.IsValid()?installation_reg.GetValue():std::wstring();
+        theme = theme_reg.IsValid()?theme_reg.GetValue():std::wstring();
+		network = network_reg.IsValid()?(network_reg.GetValue()!=0):false;
+		allow_local_storage = allow_local_storage_reg.IsValid()?(allow_local_storage_reg.GetValue()!=0):false;
+
         key.Close();
     }
 	

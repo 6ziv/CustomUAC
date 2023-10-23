@@ -10,7 +10,7 @@
 AppId={{D8DAE579-E0B6-4230-9F90-730219F3B0C6}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
-AlwaysRestart=yes
+;AlwaysRestart=yes
 ;AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 DefaultDirName={autopf}\{#MyAppName}
