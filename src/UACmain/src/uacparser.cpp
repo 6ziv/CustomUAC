@@ -204,21 +204,40 @@ bool UACParser::parseUAC(void* uac, size_t len) {
 		}
 	}
 	CloseHandle(duplicated_handle);
-	write_target = *reinterpret_cast<void**>(buffer + 6 * sizeof(UINT32) + 4 * sizeof(void*));
+
+	unsigned char* buf_write_target = buffer + 6 * sizeof(UINT32) + 4 * sizeof(void*);
+	/* 
+		At this address, the new consent data stores the base64 of a UUID (24 characters) padded to 129 bytes, and then left 7 bytes margin at the tail. 
+		So there should be a long all-zero area if we skip the first 24 bytes.
+		We can make a guess.
+	*/
+	bool is_new_type = true;
+	
+	for(size_t i=24;i<129;i++){
+		
+		if(buf_write_target[i]!=0){
+			is_new_type = false;
+			break;
+		}
+	}
+	int new_type_offset = is_new_type?136:0;
+	
+	write_target = *reinterpret_cast<void**>(buffer + 6 * sizeof(UINT32) + 4 * sizeof(void*) + new_type_offset);
+	
 	size_t base_offset = 0;
 	if (uac_type == 0 || uac_type ==2) {//Known to be excutable
 	//uac_type==2 means msi. which is similar to exe except that content meanings have changed.
-		base_offset = 6 * sizeof(DWORD) + 6 * sizeof(void*);
+		base_offset = 6 * sizeof(DWORD) + 6 * sizeof(void*) + new_type_offset;
 	}
 	else if (uac_type == 1) {//dll
-		base_offset = 6 * sizeof(DWORD) + 5 * sizeof(void*);
+		base_offset = 6 * sizeof(DWORD) + 5 * sizeof(void*) + new_type_offset;
 	}
 	else {
 		//see if any of these fits.
 		do
 		{
 			{
-				base_offset = 6 * sizeof(DWORD) + 6 * sizeof(void*);
+				base_offset = 6 * sizeof(DWORD) + 6 * sizeof(void*) + new_type_offset;
 				uintptr_t description_offset = *reinterpret_cast<uintptr_t*>(buffer + base_offset);
 				uintptr_t path_offset = *reinterpret_cast<uintptr_t*>(buffer + base_offset + sizeof(uintptr_t));
 				uintptr_t parameters_offset = *reinterpret_cast<uintptr_t*>(buffer + base_offset + 2 * sizeof(uintptr_t));
@@ -232,7 +251,7 @@ bool UACParser::parseUAC(void* uac, size_t len) {
 				)break;
 			}
 			{
-				base_offset = 6 * sizeof(DWORD) + 5 * sizeof(void*);
+				base_offset = 6 * sizeof(DWORD) + 5 * sizeof(void*) + new_type_offset;
 				uintptr_t description_offset = *reinterpret_cast<uintptr_t*>(buffer + base_offset);
 				uintptr_t path_offset = *reinterpret_cast<uintptr_t*>(buffer + base_offset + sizeof(uintptr_t));
 				uintptr_t parameters_offset = *reinterpret_cast<uintptr_t*>(buffer + base_offset + 2 * sizeof(uintptr_t));
